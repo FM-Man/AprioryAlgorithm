@@ -2,54 +2,47 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
-public class Transaction {
-    private final int[] items;
-
-    public int[] items(){
-        return items;
-    }
+public record Transaction(int[] items) {
 
     public Transaction(int[] items) {
         this.items = items;
         Arrays.sort(this.items);
     }
 
-    public boolean has(ArrayList<Integer> itemsToCheck){
+    public boolean has(ArrayList<Integer> itemsToCheck) {
         Collections.sort(itemsToCheck);
 
-        if(itemsToCheck.get(0) < items[0] || itemsToCheck.get(itemsToCheck.size()-1) > items[items.length-1]){
+        if (itemsToCheck.get(0) < items[0] || itemsToCheck.get(itemsToCheck.size() - 1) > items[items.length - 1]) {
             return false;
         }
 
-        int i=0,j=0;
+        int i = 0, j = 0;
         boolean flag = true;
-        while(true){
-            if(j==itemsToCheck.size()){
+        while (true) {
+            if (j == itemsToCheck.size()) {
                 break;
             }
-            if(i == items.length){
+            if (i == items.length) {
                 flag = false;
                 break;
             }
 
-            if(items[i]<itemsToCheck.get(j)) {
+            if (items[i] < itemsToCheck.get(j)) {
                 i++;
-            } else if(items[i]==itemsToCheck.get(j)) {
+            } else if (items[i] == itemsToCheck.get(j)) {
                 i++;
                 j++;
             } else {
                 flag = false;
                 break;
             }
-            //12345   i
-            //24     j
         }
 
         return flag;
     }
 
-    public void print(){
-        for (int i:items) {
+    public void print() {
+        for (int i : items) {
             System.out.print(i);
         }
         System.out.println();

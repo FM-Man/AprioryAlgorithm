@@ -1,3 +1,5 @@
+import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -15,7 +17,7 @@ public class Apriori {
         this.minSupport = minSupport;
     }
 
-    public void countBestSequence() throws FileNotFoundException, InterruptedException {
+    public void countBestSequence() throws FileNotFoundException {
         readFile();
         addItems();
 
@@ -32,10 +34,23 @@ public class Apriori {
             join();
         }
 
-        print(eligibleSequence);
-        System.out.println();
-        confidence();
+
+        Object[] options = {"See Confidence",
+                "Exit"};
+        int n = JOptionPane.showOptionDialog(new Frame(),//parent container of JOptionPane
+                "Most Frequent Itemset:\n"+print(eligibleSequence),
+                "Apriori Algorithm",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,//do not use a custom Icon
+                options,//the titles of buttons
+                options[0]);//default button title
+
+        if(n==0) confidence();
     }
+
+
+
 
     private void join() {
         for(int i = 0; i< eligibleSequence.size(); i++){
@@ -79,6 +94,9 @@ public class Apriori {
         }
     }
 
+
+
+
     private void removeIneligibleCandidates() {
         for(int i = countOfCandidateSequence.length-1; i>=0; i--){
             if(countOfCandidateSequence[i]< minSupport){
@@ -112,6 +130,9 @@ public class Apriori {
         }
     }
 
+
+
+
     private void readFile() throws FileNotFoundException {
         Scanner scanner = new Scanner(new File("transactions.txt"));
 
@@ -126,48 +147,49 @@ public class Apriori {
         }
     }
 
-    private void print(ArrayList<ArrayList<Integer>> a){
+    private String print(ArrayList<ArrayList<Integer>> a){
+        StringBuilder returnString = new StringBuilder();
         for (ArrayList<Integer> i:a) {
             for (int j:i) {
-                System.out.print(j+" ");
+                returnString.append(j).append(" ");
             }
-            System.out.println();
+            returnString.append("\n");
         }
+        return returnString.toString();
     }
+
+
+
+
 
     private void confidence(){
+        String output = "";
         for(ArrayList<Integer> eligibleSeq: eligibleSequence){
-            powerSet(eligibleSeq, -1, new ArrayList<>());
+            output+=powerSet(eligibleSeq, -1, new ArrayList<>());
         }
+        JOptionPane.showMessageDialog(null, output);
     }
 
-    private void powerSet(ArrayList<Integer> sequence, int index, ArrayList<Integer> prefix) {
+    private String powerSet(ArrayList<Integer> sequence, int index, ArrayList<Integer> prefix) {
         int n = sequence.size();
 
-        // base case
-        if (index == n) {
-            return;
-        }
+        if (index == n) return "";
+        String output = "";
 
-        ArrayList<Integer> newStr = new ArrayList<>(sequence);
-        // First print current subset
+        ArrayList<Integer> complimentSet = new ArrayList<>(sequence);
         if(prefix.size() != 0 && prefix.size() != sequence.size()) {
-            newStr.removeAll(prefix);
-            System.out.println("confidence of " + prefix + " => " + newStr+" is "+100*countConfidence(prefix,sequence)+" %");
+            complimentSet.removeAll(prefix);
+            output+= "confidence of " + prefix + " => " + complimentSet+" is "+countConfidence(prefix,sequence)+" %\n";
         }
 
-        // Try appending remaining characters
-        // to current subset
         for (int i = index + 1; i < n; i++) {
             prefix.add(sequence.get(i));
-            powerSet(sequence, i, prefix);
+            output+=powerSet(sequence, i, prefix);
 
-            // Once all subsets beginning with
-            // initial "curr" are printed, remove
-            // last character to consider a different
-            // prefix of subsets.
             prefix.remove(prefix.size()-1);
         }
+
+        return output;
     }
 
     private double countConfidence(ArrayList<Integer> given, ArrayList<Integer> expected){
@@ -178,7 +200,6 @@ public class Apriori {
             if(t.has(given)) givenCount++;
             if(t.has(expected)) expectedCount++;
         }
-        return ((double) expectedCount)/((double) givenCount);
+        return (double) ((int)(((double) expectedCount)/((double) givenCount)*10000))/100;
     }
-
 }
