@@ -4,15 +4,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Scanner;
 
-public class Driver {
-    public static final ArrayList<Transaction> transactions = new ArrayList<>();
+public class Apriori {
+    private final ArrayList<Transaction> transactions = new ArrayList<>();
+    private ArrayList<ArrayList<Integer>> candidateSequence = new ArrayList<>();
+    private ArrayList<ArrayList<Integer>> eligibleSequence = new ArrayList<>();
+    private int[] countOfCandidateSequence;
+    private final int minSupport;
 
-    public static ArrayList<ArrayList<Integer>> candidateSequence = new ArrayList<>();
-    public static ArrayList<ArrayList<Integer>> eligibleSequence = new ArrayList<>();
-    public static int[] count;
-    public static int minSupport = 2;
+    public Apriori(int minSupport){
+        this.minSupport = minSupport;
+    }
 
-    public static void main(String[] args) throws FileNotFoundException {
+    public void countBestSequence() throws FileNotFoundException, InterruptedException {
         readFile();
         addItems();
 
@@ -30,9 +33,11 @@ public class Driver {
         }
 
         print(eligibleSequence);
+        System.out.println();
+        confidence();
     }
 
-    private static void join() {
+    private void join() {
         for(int i = 0; i< eligibleSequence.size(); i++){
             for (int j = i+1; j< eligibleSequence.size(); j++){
                 if(hasCommonPrefix(eligibleSequence.get(i), eligibleSequence.get(j))){
@@ -56,11 +61,11 @@ public class Driver {
         }
     }
 
-    private static int lastElement(ArrayList<Integer> a){
+    private int lastElement(ArrayList<Integer> a){
         return a.get(a.size()-1);
     }
 
-    private static boolean hasCommonPrefix(ArrayList<Integer> a, ArrayList<Integer> b){
+    private boolean hasCommonPrefix(ArrayList<Integer> a, ArrayList<Integer> b){
         if(a.size() <= 1) return true;
         else {
             boolean flag = true;
@@ -74,40 +79,40 @@ public class Driver {
         }
     }
 
-    private static void removeIneligibleCandidates() {
-        for(int i= count.length-1;i>=0;i--){
-            if(count[i]< minSupport){
+    private void removeIneligibleCandidates() {
+        for(int i = countOfCandidateSequence.length-1; i>=0; i--){
+            if(countOfCandidateSequence[i]< minSupport){
                 candidateSequence.remove(i);
             }
         }
     }
 
-    private static void countCandidateSequences() {
-        count = new int[candidateSequence.size()];
+    private void countCandidateSequences() {
+        countOfCandidateSequence = new int[candidateSequence.size()];
         for (int i = 0; i< candidateSequence.size(); i++) {
             for (Transaction t : transactions) {
                 if (t.has(candidateSequence.get(i)))
-                    count[i]++;
+                    countOfCandidateSequence[i]++;
             }
         }
     }
 
-    private static void addItems() {
+    private void addItems() {
         ArrayList<Integer> allItems = new ArrayList<>();
         for (Transaction t:transactions) {
-            for (int i:t.items) {
+            for (int i:t.items()) {
                 if(!allItems.contains(i)) allItems.add(i);
             }
         }
         Collections.sort(allItems);
-        for (Integer allItem : allItems) {
+        for (Integer anItem : allItems) {
             ArrayList<Integer> aL = new ArrayList<>();
-            aL.add(allItem);
+            aL.add(anItem);
             candidateSequence.add(aL);
         }
     }
 
-    private static void readFile() throws FileNotFoundException {
+    private void readFile() throws FileNotFoundException {
         Scanner scanner = new Scanner(new File("transactions.txt"));
 
         while (scanner.hasNextLine()){
@@ -121,7 +126,7 @@ public class Driver {
         }
     }
 
-    private static void print(ArrayList<ArrayList<Integer>> a){
+    private void print(ArrayList<ArrayList<Integer>> a){
         for (ArrayList<Integer> i:a) {
             for (int j:i) {
                 System.out.print(j+" ");
@@ -129,4 +134,51 @@ public class Driver {
             System.out.println();
         }
     }
+
+    private void confidence(){
+        for(ArrayList<Integer> eligibleSeq: eligibleSequence){
+            powerSet(eligibleSeq, -1, new ArrayList<>());
+        }
+    }
+
+    private void powerSet(ArrayList<Integer> sequence, int index, ArrayList<Integer> prefix) {
+        int n = sequence.size();
+
+        // base case
+        if (index == n) {
+            return;
+        }
+
+        ArrayList<Integer> newStr = new ArrayList<>(sequence);
+        // First print current subset
+        if(prefix.size() != 0 && prefix.size() != sequence.size()) {
+            newStr.removeAll(prefix);
+            System.out.println("confidence of " + prefix + " => " + newStr+" is "+100*countConfidence(prefix,sequence)+" %");
+        }
+
+        // Try appending remaining characters
+        // to current subset
+        for (int i = index + 1; i < n; i++) {
+            prefix.add(sequence.get(i));
+            powerSet(sequence, i, prefix);
+
+            // Once all subsets beginning with
+            // initial "curr" are printed, remove
+            // last character to consider a different
+            // prefix of subsets.
+            prefix.remove(prefix.size()-1);
+        }
+    }
+
+    private double countConfidence(ArrayList<Integer> given, ArrayList<Integer> expected){
+        int givenCount = 0;
+        int expectedCount = 0;
+
+        for (Transaction t:transactions){
+            if(t.has(given)) givenCount++;
+            if(t.has(expected)) expectedCount++;
+        }
+        return ((double) expectedCount)/((double) givenCount);
+    }
+
 }

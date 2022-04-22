@@ -3,7 +3,11 @@ import java.util.Arrays;
 import java.util.Collections;
 
 public class Transaction {
-    public final int[] items;
+    private final int[] items;
+
+    public int[] items(){
+        return items;
+    }
 
     public Transaction(int[] items) {
         this.items = items;
@@ -28,7 +32,6 @@ public class Transaction {
                 break;
             }
 
-
             if(items[i]<itemsToCheck.get(j)) {
                 i++;
             } else if(items[i]==itemsToCheck.get(j)) {
@@ -38,6 +41,8 @@ public class Transaction {
                 flag = false;
                 break;
             }
+            //12345   i
+            //24     j
         }
 
         return flag;
