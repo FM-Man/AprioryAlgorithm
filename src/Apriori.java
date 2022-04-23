@@ -1,5 +1,4 @@
 import javax.swing.*;
-import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -35,16 +34,18 @@ public class Apriori {
         }
 
 
-        Object[] options = {"See Confidence",
-                "Exit"};
-        int n = JOptionPane.showOptionDialog(new Frame(),//parent container of JOptionPane
+        Object[] options = {
+                "See Confidence",
+                "Exit"
+        };
+        int n = JOptionPane.showOptionDialog(null,
                 "Most Frequent Itemset:\n"+print(eligibleSequence),
                 "Apriori Algorithm",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE,
-                null,//do not use a custom Icon
-                options,//the titles of buttons
-                options[0]);//default button title
+                null,
+                options,
+                options[0]);
 
         if(n==0) confidence();
     }
@@ -134,7 +135,7 @@ public class Apriori {
 
 
     private void readFile() throws FileNotFoundException {
-        Scanner scanner = new Scanner(new File("transactions.txt"));
+        Scanner scanner = new Scanner(new File("transactions.csv"));
 
         while (scanner.hasNextLine()){
             String string = scanner.nextLine();

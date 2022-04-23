@@ -1,5 +1,4 @@
 import javax.swing.*;
-import java.awt.*;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -8,17 +7,19 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
         while (true) {
-            Object[] options = {"New Transaction",
+            Object[] options = {
+                    "New Transaction",
                     "Most Frequent Itemset",
-                    "Exit"};
-            int n = JOptionPane.showOptionDialog(new Frame(),//parent container of JOptionPane
+                    "Exit"
+            };
+            int n = JOptionPane.showOptionDialog(null,
                     "Welcome!",
                     "Apriori Algorithm",
                     JOptionPane.YES_NO_CANCEL_OPTION,
                     JOptionPane.QUESTION_MESSAGE,
-                    null,//do not use a custom Icon
-                    options,//the titles of buttons
-                    options[1]);//default button title
+                    null,
+                    options,
+                    options[1]);
 
             if(n==2) break;
             else if(n==1){
@@ -27,7 +28,7 @@ public class Main {
             }
             else if(n==0){
                 String newTrans = JOptionPane.showInputDialog(null, "New Transactions (Items Separated by comma):");
-                BufferedWriter bf = new BufferedWriter(new FileWriter("transactions.txt",true));
+                BufferedWriter bf = new BufferedWriter(new FileWriter("transactions.csv",true));
                 bf.append("\n").append(newTrans);
                 bf.close();
             }
